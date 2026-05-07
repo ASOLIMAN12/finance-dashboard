@@ -1109,4 +1109,25 @@ cloudLoadAll().finally(()=>{init(); setInterval(()=>cloudSaveAll('auto'),5000);}
 })();
 </script>
 
-</body></html>
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAGx0i5JNyGbWAQmbnyoEnb2pzeyeE-fW0",
+  authDomain: "finance-dashboard-16f3a.firebaseapp.com",
+  projectId: "finance-dashboard-16f3a",
+  storageBucket: "finance-dashboard-16f3a.firebasestorage.app",
+  messagingSenderId: "932346328149",
+  appId: "1:932346328149:web:f73b43ee2a114fa83590dc"
+};
+
+const app = initializeApp(firebaseConfig);
+
+console.log("Firebase connected");
+  
+</script>
+
+</body>
+</html>
