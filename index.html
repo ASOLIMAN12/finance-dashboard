@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>داش بورد صيدليات لنا</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<style>
+:root{
+  --bg:#07111f;--panel:#101b2d;--panel2:#17243a;--card:#111d31;--text:#f8fafc;--muted:#94a3b8;
+  --border:rgba(148,163,184,.22);--primary:#10b981;--secondary:#3b82f6;--warn:#f59e0b;--danger:#ef4444;--purple:#8b5cf6;
+  --shadow:0 18px 55px rgba(0,0,0,.28);--radius:18px;--font: "Cairo", "Tajawal", Tahoma, Arial, sans-serif;
+}
+.theme-light{--bg:#f4f7fb;--panel:#ffffff;--panel2:#eef4fb;--card:#ffffff;--text:#111827;--muted:#64748b;--border:#d8e1ef;--shadow:0 12px 35px rgba(30,41,59,.12)}
+.theme-blue{--bg:#06172e;--panel:#0c2342;--panel2:#123055;--card:#0d2749;--primary:#38bdf8;--secondary:#60a5fa}
+.theme-green{--bg:#061d19;--panel:#0d2a25;--panel2:#123b34;--card:#0f312b;--primary:#34d399;--secondary:#2dd4bf}
+.theme-purple{--bg:#160b2e;--panel:#241344;--panel2:#321b5b;--card:#27164b;--primary:#c084fc;--secondary:#818cf8}
+.theme-sand{--bg:#f6efe3;--panel:#fffaf2;--panel2:#f1e3ce;--card:#fffaf2;--text:#352315;--muted:#7c6651;--border:#dfcbb2;--primary:#d97706;--secondary:#0284c7;--shadow:0 12px 35px rgba(120,53,15,.12)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh}body:before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 80% 10%, color-mix(in srgb,var(--primary) 18%,transparent), transparent 35%),radial-gradient(circle at 10% 80%, color-mix(in srgb,var(--secondary) 12%,transparent), transparent 35%);pointer-events:none}
+.en{direction:ltr}.en .rtl-only{display:none!important}.ar-only{display:inline}.en .ar-only{display:none!important}.en .en-only{display:inline!important}.en-only{display:none!important}
+.header{position:sticky;top:0;z-index:80;background:color-mix(in srgb,var(--panel) 95%, transparent);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:12px;font-size:1.35rem;font-weight:900}.logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--primary),var(--secondary));display:grid;place-items:center;color:white;box-shadow:0 0 28px color-mix(in srgb,var(--primary) 35%, transparent)}
+.header-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.chip{border:1px solid var(--border);background:var(--panel2);color:var(--text);border-radius:999px;padding:8px 12px;font-size:.85rem}.live{color:var(--primary);border-color:color-mix(in srgb,var(--primary) 40%,var(--border))}
+.wrap{position:relative;z-index:1;max-width:1760px;margin:auto;padding:22px 18px 60px}.section{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:18px}.title{font-size:1.35rem;font-weight:900;margin:0 0 16px;display:flex;align-items:center;gap:10px}.title:before{content:"";width:5px;height:28px;border-radius:999px;background:linear-gradient(var(--primary),var(--secondary))}
+.grid{display:grid;gap:14px}.filters{grid-template-columns:repeat(7,minmax(145px,1fr))}.admin-grid{grid-template-columns:repeat(5,minmax(180px,1fr))}
+label{display:block;color:var(--muted);font-size:.8rem;font-weight:700;margin-bottom:6px}input,select,button{font-family:inherit}input,select{width:100%;border:1px solid var(--border);background:var(--panel2);color:var(--text);border-radius:13px;padding:12px 13px;outline:none;font-weight:700}select[multiple]{height:120px}button{border:0;border-radius:13px;padding:12px 16px;font-weight:900;cursor:pointer;background:var(--panel2);color:var(--text);border:1px solid var(--border);transition:.16s}button:hover{transform:translateY(-1px);filter:brightness(1.07)}.btn{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border:0}.danger{background:color-mix(in srgb,var(--danger) 18%,var(--panel2));border-color:color-mix(in srgb,var(--danger) 45%,var(--border))}.warn{background:color-mix(in srgb,var(--warn) 18%,var(--panel2));border-color:color-mix(in srgb,var(--warn) 45%,var(--border))}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.hidden{display:none!important}.status{color:var(--primary);font-weight:900;min-height:20px;margin-top:10px}.small{color:var(--muted);font-size:.82rem;line-height:1.8}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}.kpi{background:linear-gradient(180deg,color-mix(in srgb,var(--card) 97%,white),var(--card));border:1px solid var(--border);border-radius:var(--radius);padding:18px;min-height:132px;cursor:pointer;position:relative;overflow:hidden;box-shadow:var(--shadow)}.kpi:after{content:"";position:absolute;inset:auto -30px -35px auto;width:100px;height:100px;border-radius:999px;background:var(--kcolor,var(--primary));opacity:.13}.kpi b{display:block;color:var(--muted);font-size:.86rem;margin-bottom:8px}.kpi .val{font-size:1.65rem;color:var(--kcolor,var(--primary));font-weight:1000;letter-spacing:-.5px}.kpi .sub{color:var(--muted);font-size:.78rem;margin-top:6px}.tabs{display:flex;gap:8px;overflow:auto;padding:6px;background:var(--panel);border:1px solid var(--border);border-radius:999px;margin-bottom:18px}.tab{white-space:nowrap;border-radius:999px;padding:11px 22px}.tab.active{background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;border:0}.panel{display:none}.panel.active{display:block}
+.charts{display:grid;grid-template-columns:1.55fr .95fr;gap:16px}.chart-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);min-height:390px}.chart-title{font-weight:900;color:var(--muted);margin-bottom:12px}.chart-area{height:330px;position:relative;overflow:auto}.chart-area canvas{width:100%;height:100%;min-width:760px}.donut{display:grid;place-items:center;min-height:330px}
+.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow)}table{width:100%;border-collapse:collapse;min-width:920px}th,td{padding:12px;border-bottom:1px solid var(--border);text-align:center}th{background:var(--panel2);color:var(--muted);font-size:.82rem}td:first-child,th:first-child{text-align:right}.en td:first-child,.en th:first-child{text-align:left}.pos{color:var(--primary);font-weight:900}.neg{color:var(--danger);font-weight:900}.muted{color:var(--muted)}.cards-view{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}.branch-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}.branch-card h3{margin:0 0 10px;color:var(--primary)}.metric-line{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--border);padding:8px 0}.alert{padding:13px;border:1px solid var(--border);border-radius:14px;background:var(--card);margin-bottom:10px}.alert.high{border-color:color-mix(in srgb,var(--danger) 60%,var(--border));background:color-mix(in srgb,var(--danger) 12%,var(--card))}.alert.good{border-color:color-mix(in srgb,var(--primary) 60%,var(--border));background:color-mix(in srgb,var(--primary) 12%,var(--card))}.alert.mid{border-color:color-mix(in srgb,var(--warn) 60%,var(--border));background:color-mix(in srgb,var(--warn) 12%,var(--card))}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.66);z-index:200;display:flex;align-items:center;justify-content:center;padding:18px}.modal-box{background:var(--panel);border:1px solid var(--border);border-radius:22px;width:min(1150px,96vw);max-height:92vh;overflow:auto;padding:20px;box-shadow:var(--shadow)}.modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.modal-head h2{margin:0}
+.month-grid,.year-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}.pill{display:flex;align-items:center;justify-content:center;gap:7px;padding:10px;border:1px solid var(--border);border-radius:999px;background:var(--panel2);font-weight:900}.pill input{width:auto;accent-color:var(--primary)}.pill:has(input:checked){border-color:var(--primary);background:color-mix(in srgb,var(--primary) 16%,var(--panel2))}
+.view-compact .kpi{min-height:95px;padding:12px}.view-compact .chart-card{min-height:270px}.view-compact .chart-area{height:230px}.view-table .cards-only{display:none!important}.view-cards .table-only{display:none!important}
+.permissions{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.perm{padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--panel2)}
+@media(max-width:1150px){.filters,.admin-grid,.charts{grid-template-columns:1fr}.header{position:static}.chart-area canvas{min-width:700px}}
+@media print{.header,.filters-section,.tabs,.toolbar,.admin-only,.modal,button,input,select{display:none!important}.panel{display:block!important}.section,.chart-card,.table-wrap,.kpi{box-shadow:none;background:white!important;color:#111!important;border-color:#ddd!important}body{background:white!important;color:#111!important}.wrap{max-width:none}.kpi .val{color:#047857!important}}
+</style>
+</head>
+<body class="theme-dark view-cards">
+<header class="header">
+  <div class="brand"><div class="logo">📊</div><div><span data-ar="داش بورد صيدليات لنا" data-en="Lana Pharmacies Dashboard">داش بورد صيدليات لنا</span><div class="small">Branch + Group Financial Control</div></div></div>
+  <div class="header-actions">
+    <span class="chip live">Finance Control ●</span><span class="chip" id="roleChip">غير مسجل</span><button id="langBtn">English</button><button id="loginSwitchBtn" data-ar="تبديل المستخدم" data-en="Switch user">تبديل المستخدم</button>
+  </div>
+</header>
+<div class="wrap">
+<section class="section filters-section">
+  <h2 class="title" data-ar="إدارة البيانات والفلاتر" data-en="Data & Filters">إدارة البيانات والفلاتر</h2>
+  <div class="grid filters">
+    <div><label data-ar="السنة" data-en="Year">السنة</label><select id="yearFilter"></select></div>
+    <div><label data-ar="الشهر" data-en="Month">الشهر</label><select id="monthFilter"></select></div>
+    <div><label data-ar="الصيدلية" data-en="Branch">الصيدلية</label><select id="branchFilter"></select></div>
+    <div><label data-ar="البند" data-en="Account">البند</label><select id="itemFilter"></select></div>
+    <div><label data-ar="طريقة العرض" data-en="View mode">طريقة العرض</label><select id="viewMode"><option value="cards">عرض بطاقي</option><option value="table">عرض جدول</option><option value="compact">عرض مختصر</option></select></div>
+    <div><label data-ar="ألوان الداش بورد" data-en="Theme">ألوان الداش بورد</label><select id="themeMode"><option value="dark">داكن</option><option value="light">فاتح</option><option value="blue">أزرق</option><option value="green">أخضر</option><option value="purple">بنفسجي</option><option value="sand">رملي</option></select></div>
+    <div><label data-ar="بحث" data-en="Search">بحث</label><input id="searchBox" placeholder="بحث في فرع أو بند"></div>
+  </div>
+  <div class="toolbar" style="margin-top:16px">
+    <button class="btn admin-only" id="importExcelBtn">استيراد Excel</button><button id="exportExcelBtn">تصدير Excel مطابق للقالب</button><button id="templateBtn">تحميل قالب</button>
+    <button id="printBtn">طباعة</button><button id="compareBtn">صفحة المقارنات</button><button class="warn admin-only" id="backupBtn">نسخ احتياطي الآن</button><button class="warn admin-only" id="restoreBtn">استرجاع آخر نسخة</button>
+    <button class="danger admin-only" id="resetBtn">تهيئة النظام</button><button class="admin-only" id="usersBtn">إدارة المستخدمين والصلاحيات</button><button class="admin-only" id="adminBtn">لوحة التحكم</button>
+    <input id="fileInput" type="file" accept=".xlsx,.xls,.csv" class="hidden">
+  </div>
+  <div id="status" class="status"></div>
+</section>
+
+<div class="tabs">
+  <button class="tab active" data-tab="dashboard">الرئيسية والرسوم</button><button class="tab" data-tab="details">تفاصيل البنود</button><button class="tab" data-tab="compare">المقارنات الشهرية والسنوية</button><button class="tab" data-tab="branches">مقارنات الفروع</button><button class="tab" data-tab="alerts">التنبيهات الذكية</button><button class="tab" data-tab="admin">إدارة الصيدليات</button>
+</div>
+
+<section id="tab-dashboard" class="panel active">
+  <div class="kpis" id="kpiGrid"></div>
+  <div class="charts" style="margin-top:16px">
+    <div class="chart-card"><div class="chart-title">الإيرادات / تكلفة المبيعات / مجمل الربح حسب الفترة</div><div class="chart-area"><canvas id="mainChart"></canvas></div></div>
+    <div class="chart-card"><div class="chart-title">توزيع مجمل الربح حسب الصيدليات</div><div class="donut"><canvas id="donutChart" width="420" height="330"></canvas></div></div>
+  </div>
+  <div style="margin-top:16px" class="cards-only"><div class="cards-view" id="branchCards"></div></div>
+  <div style="margin-top:16px" class="table-only"><div class="table-wrap"><table><thead id="dashHead"></thead><tbody id="dashBody"></tbody></table></div></div>
+</section>
+
+<section id="tab-details" class="panel">
+  <div class="section"><h2 class="title">جدول التفاصيل</h2><div class="table-wrap"><table><thead id="detailHead"></thead><tbody id="detailBody"></tbody></table></div></div>
+</section>
+
+<section id="tab-compare" class="panel">
+  <div class="section">
+    <h2 class="title">المقارنات الشهرية والسنوية على مستوى الصيدلية</h2>
+    <div class="grid" style="grid-template-columns:1fr 1fr;gap:18px">
+      <div><label>فلتر السنوات</label><div id="yearChecks" class="year-grid"></div><div class="toolbar admin-only" style="margin-top:10px"><input id="newYear" placeholder="مثال 2027"><button class="btn" id="addYearBtn">إضافة سنة</button><button class="danger" id="deleteEmptyYearsBtn">حذف السنوات اليدوية الفارغة</button></div></div>
+      <div><label>فلتر الشهور</label><div id="monthChecks" class="month-grid"></div></div>
+    </div>
+  </div>
+  <div class="charts"><div class="chart-card"><div class="chart-title">مقارنة الصيدلية المختارة عبر أكثر من شهر أو سنة</div><div class="chart-area"><canvas id="compareChart"></canvas></div></div><div class="chart-card"><div class="chart-title">جدول المقارنة</div><div class="table-wrap"><table><thead id="compareHead"></thead><tbody id="compareBody"></tbody></table></div></div></div>
+</section>
+
+<section id="tab-branches" class="panel">
+  <div class="charts"><div class="chart-card"><div class="chart-title">ترتيب الفروع حسب مجمل الربح</div><div class="chart-area"><canvas id="branchChart"></canvas></div></div><div class="chart-card"><div class="chart-title">أفضل وأسوأ الفروع</div><div id="rankCards" class="cards-view"></div></div></div>
+</section>
+
+<section id="tab-alerts" class="panel">
+  <div class="section"><h2 class="title">التنبيهات الذكية</h2><div id="alertsList"></div></div>
+</section>
+
+<section id="tab-admin" class="panel">
+  <div class="section admin-only">
+    <h2 class="title">إدارة الصيدليات والسنوات</h2>
+    <div class="grid admin-grid">
+      <div><label>كود الصيدلية</label><input id="branchCode" placeholder="P001"></div>
+      <div><label>اسم الصيدلية</label><input id="branchName" placeholder="اسم الصيدلية"></div>
+      <div><label>حالة الفرع</label><select id="branchActive"><option value="active">نشط</option><option value="inactive">موقوف</option></select></div>
+      <div style="display:flex;align-items:end"><button class="btn" id="saveBranchBtn">إضافة / تعديل الصيدلية</button></div>
+      <div style="display:flex;align-items:end"><button class="danger" id="deleteBranchBtn">حذف الصيدلية المحددة</button></div>
+    </div>
+    <p class="small">أي إضافة أو حذف أو تعديل يتم حفظه، وعند تصدير Excel تظهر نفس الصيدليات داخل الملف بنفس شكل القالب.</p>
+  </div>
+  <div class="section"><h2 class="title">سجل الصيدليات</h2><div class="table-wrap"><table><thead><tr><th>الكود</th><th>الصيدلية</th><th>الحالة</th><th>إجمالي الإيرادات</th><th>تكلفة المبيعات</th><th>مجمل الربح</th></tr></thead><tbody id="branchesBody"></tbody></table></div></div>
+</section>
+</div>
+
+<div id="detailModal" class="modal hidden"><div class="modal-box"><div class="modal-head"><h2 id="modalTitle">تفاصيل</h2><button onclick="closeModal()">إغلاق</button></div><div class="charts"><div class="chart-card"><div class="chart-title">رسم تفصيلي</div><div class="chart-area"><canvas id="modalChart"></canvas></div></div><div class="chart-card"><div class="chart-title">تفاصيل البند حسب الصيدلية والفترة</div><div class="table-wrap"><table><thead id="modalHead"></thead><tbody id="modalBody"></tbody></table></div></div></div></div></div>
+
+<div id="usersModal" class="modal hidden"><div class="modal-box"><div class="modal-head"><h2>إدارة المستخدمين والصلاحيات</h2><button onclick="usersModal.classList.add('hidden')">إغلاق</button></div>
+  <div class="grid" style="grid-template-columns:repeat(4,1fr);gap:12px"><div><label>اسم المستخدم</label><input id="uName"></div><div><label>كلمة المرور</label><input id="uPass"></div><div><label>الدور</label><select id="uRole"><option value="admin">أدمن</option><option value="editor">مدخل بيانات</option><option value="viewer">مشاهد</option></select></div><div style="display:flex;align-items:end"><button class="btn" id="addUserBtn">حفظ المستخدم</button></div></div>
+  <div class="permissions" style="margin:14px 0">
+    <label class="perm"><input type="checkbox" class="permCheck" value="import"> استيراد</label><label class="perm"><input type="checkbox" class="permCheck" value="export"> تصدير</label><label class="perm"><input type="checkbox" class="permCheck" value="branches"> إدارة الفروع</label><label class="perm"><input type="checkbox" class="permCheck" value="users"> إدارة المستخدمين</label><label class="perm"><input type="checkbox" class="permCheck" value="reset"> تهيئة النظام</label><label class="perm"><input type="checkbox" class="permCheck" value="print"> طباعة</label><label class="perm"><input type="checkbox" class="permCheck" value="backup"> نسخ احتياطي</label>
+  </div>
+  <div class="table-wrap"><table><thead><tr><th>المستخدم</th><th>الدور</th><th>الصلاحيات</th><th>إجراء</th></tr></thead><tbody id="usersBody"></tbody></table></div>
+</div></div>
+
+<div id="loginModal" class="modal"><div class="modal-box" style="width:min(440px,94vw)"><div class="modal-head"><h2>تسجيل الدخول</h2></div><div><label>اسم المستخدم</label><input id="loginUser" autocomplete="username" placeholder="اكتب اسم المستخدم"></div><div style="margin-top:10px"><label>كلمة المرور</label><input id="loginPass" type="password" autocomplete="current-password" placeholder="اكتب كلمة المرور"></div><div class="toolbar" style="margin-top:14px"><button class="btn" id="loginBtn">دخول</button><button id="viewerBtn">دخول مشاهدة</button></div><p class="small">تم إخفاء بيانات الأدمن من شاشة الدخول حفاظًا على الخصوصية.</p></div></div>
+
+<script>
+const SEED = {"year": "2026", "month": "مايو", "branches": ["الادارات والاقسام المركزية", "صيدلية  عيادات لنا - مجمع الحمرا", "صيدلية السدحان - فرع 15", "صيدلية لنا ظهرة لبن ش المجد - فرع 36", "صيدلية لنا المهديه فرع 31", "صيدلية النهضه 2", "صيدلية شونه - جابر - فرع 13", "صيدلية  مجمع لنا الطبي - فرع 11", "صيدلية لنا طويق1  جوار العثيم - فرع 32", "صيدلية لنا وادي لبن ش الطائف -33", "صيدلية لنا مجمع لولو - فرع 35", "عمومى مستودع الرياض ( السدحان )", "صيدلية لنا طويق - حي نمار فرع 34", "مبيعات ايفنتات", "صيدلية النهضه - فرع 12"], "items": [{"name": "إجمالي الإيرادات", "values": [0.0, 4972.12, 291805.42, 104497.08, 64295.469999999994, 49783.54, 148736.03, 665361.08, 44223.979999999996, 41732.29, 58883.74, 0.0, 52423.85, 899.39, 96882.71]}, {"name": "إجمالي تكلفة المبيعات", "values": [0.0, 2715.31, 184349.8, 76333.89, 45171.659999999996, 30839.379999999997, 99035.38, 375623.89, 30844.149999999998, 25072.469999999998, 43006.66999999999, 6974.799999999999, 40354.63, 430.5, 60511.42999999999]}, {"name": "مجمل الربح  (Gross Profit)", "values": [0, 2256.81, 107455.62, 28163.190000000002, 19123.809999999998, 18944.160000000003, 49700.649999999994, 289737.18999999994, 13379.829999999998, 16659.820000000003, 15877.070000000007, -6974.799999999999, 12069.220000000001, 468.89, 36371.28000000001]}, {"name": "  ◈  المصروفـات التشغيليـة", "values": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"name": "الرواتب والمزايا", "values": [218218.03, 19936.09, 48694.34, 20110.23, 41184.2, 14286.06, 41692.14, 88136.88, 25472.51, 27435.06, 21060.03, 51711.66, 22932.88, 0.001, 36043.46]}, {"name": "الإيجارات", "values": [744.0, 0, 58020.0, 11458.32, 11666.66, 13333.33, 20144.93, 2976.0, 16291.66, 10208.32, 21776.66, 13705.33, 15416.66, 0, 10200.0]}, {"name": "السيارات", "values": [4630.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"name": "الصيانة", "values": [0, 0, 1450.0, 0, 0, 150.0, 0, 350.0, 0, 0, 0, 170.0, 0, 0, 0]}, {"name": "التأمين", "values": [21554.77, 0, 1930.58, 1240.06, 2019.35, 1748.02, 3122.9, 5203.4, 1590.92, 1370.0, 4052.33, 2879.57, 0, 0, 6205.54]}, {"name": "المرافق والخدمات", "values": [1691.56, 0, 6746.34, 1557.87, 1644.46, 1447.12, 1866.92, 664.25, 4103.8, 599.77, 460.0, 813.51, 2715.9, 0, 788.27]}, {"name": "الرسوم الحكومية", "values": [10870.0, 0, 4250.0, 10376.5, 0, 2125.0, 2125.0, 2125.0, 2125.0, 2125.0, 3274.5, 2125.0, 9252.5, 0, 6375.0]}, {"name": "عمولات بنكية", "values": [729.84, 31.6345381195538, 1856.5782166324238, 664.8505789566751, 409.0724875163165, 316.74201223146895, 946.3157789405923, 4233.282875016589, 281.36995509126587, 265.5168658080002, 374.64098164402606, 0.0, 333.54067906622737, 0, 616.4050309768622]}, {"name": "مطبوعات وأدوات مكتبية", "values": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 58.0, 0, 0, 0, 0]}, {"name": "العجز والزيادة", "values": [0, 0, -20.0, 0, 0, 0, -850.0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"name": "إجمالي المصروفات العمومية والإدارية", "values": [258438.19999999998, 19967.724538119553, 122927.83821663242, 45407.83057895668, 56923.74248751631, 33406.27201223147, 69048.2057789406, 103688.81287501659, 49865.259955091264, 42003.666865808, 51056.16098164403, 71405.07, 50651.48067906623, 0.001, 60228.67503097686]}, {"name": "المصروفات البيعية", "values": [0, 391.77, 15289.06, 8160.92, 4039.94, 2701.98, 9786.55, 8302.15, 3274.0, 5097.13, 4912.76, 0, 4507.41, 198.6, 5262.4]}, {"name": "المصروفات التسويقية", "values": [0, 1833.33, 2683.33, 2683.34, 2683.33, 2683.33, 2683.33, 2683.33, 2683.34, 2683.33, 1833.34, 8000.0, 2683.34, 0, 2683.33]}, {"name": "إجمالي مصروفات البيع والتسويق", "values": [0.0, 2225.1, 17972.39, 10844.26, 6723.27, 5385.3099999999995, 12469.88, 10985.48, 5957.34, 7780.46, 6746.1, 8000.0, 7190.75, 198.6, 7945.73]}, {"name": "  ◈  المصروفـات التمويليـة", "values": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"name": "مصروفات فوائد القروض", "values": [78402.27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"name": "إجمالي المصروفات التمويلية", "values": [78402.27, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0.0]}, {"name": "الاهلاكات والاطفاء", "values": [0, 0.0, 12128.0, 392.17, 1420.89, 0.0, 3072.94, 27648.56, 886.21, 839.55, 755.63, 42.4, 822.21, 0.0, 2246.86]}, {"name": "مصروفات سنوات سابقة", "values": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"name": "إجمالي جميع المصروفات", "values": [336840.47, 22192.824538119552, 153028.22821663241, 56644.26057895668, 65067.902487516316, 38791.58201223147, 84591.0257789406, 142322.8528750166, 56708.80995509127, 50623.676865808004, 58557.89098164403, 79447.47, 58664.44067906623, 198.601, 70421.26503097687]}, {"name": "صافي الربح / (الخسارة)", "values": [-336840.47, -19936.01453811955, -45572.60821663242, -28481.07057895668, -45944.09248751632, -19847.422012231465, -34890.37577894061, 147414.33712498334, -43328.97995509127, -33963.856865808004, -42680.82098164402, -86422.27, -46595.22067906623, 270.289, -34049.98503097685]}, {"name": "  ◈  المؤشـرات الماليـة", "values": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"name": "هامش مجمل الربح %", "values": [0, 0.45389290684858774, 0.3682440853908745, 0.2695117413807161, 0.29743635127015944, 0.3805305930434036, 0.3341533991461248, 0.43545857837070956, 0.3025469439883068, 0.3992069450298559, 0.2696341978277876, 0.0, 0.23022383895879456, 0.5213422430758625, 0.37541559273063285]}, {"name": "  نقطة التعادل — الإيرادات المطلوبة  (ر.س)", "values": [0.0, 48894.40703580496, 415561.94461127557, 210173.62838727015, 218762.44181201502, 101940.7709166944, 253150.27767216897, 326834.4222486667, 187438.0524474345, 126810.61162906863, 217175.31178683913, 0.0, 254814.79652316106, 380.9416993111391, 187582.15267181332]}, {"name": " المبلغ الواجب زيادته علي المبيعات لتحقيق نقطة التعادل لكل فرع لم يحقق ارباح", "values": [0, 43922.287035804955, 123756.52461127558, 105676.54838727014, 154466.97181201502, 52157.230916694396, 104414.24767216897, 0.0, 143214.07244743448, 85078.32162906864, 158291.57178683914, 0.0, 202390.94652316105, 0, 90699.44267181332]}]};
+const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const CORE = { revenue:'إجمالي الإيرادات', cogs:'إجمالي تكلفة المبيعات', gross:'مجمل الربح  (Gross Profit)', net:'صافي الربح', breakeven:'نقطة التعادل' };
+const STORE='lana_pharmacy_dashboard_v13_annual';
+const BACKUP='lana_pharmacy_dashboard_backup_v13_annual';
+const AUTH_VERSION='hide_admin_2026_06_16';
+if(localStorage.getItem('lana_auth_version')!==AUTH_VERSION){localStorage.removeItem('lana_current_user');localStorage.setItem('lana_auth_version',AUTH_VERSION)}
+let state = loadState();
+let currentUser = JSON.parse(localStorage.getItem('lana_current_user')||'null');
+let lang = localStorage.getItem('lana_lang')||'ar';
+
+function defaultState(){
+  const branches=SEED.branches.map((name,i)=>({code:'P'+String(i+1).padStart(3,'0'),name,active:true}));
+  const records=[];
+  branches.forEach((b,bi)=>{
+    const items={};
+    SEED.items.forEach(it=>items[it.name]=Number(it.values[bi]||0));
+    records.push({year:SEED.year,month:SEED.month,branchCode:b.code,branchName:b.name,items});
+  });
+  return {branches,records,manualYears:['2025','2026'],theme:'dark',view:'cards',users:[
+    {username:'admin',password:'admin123',role:'admin',perms:['import','export','branches','users','reset','print']},
+    {username:'viewer',password:'123456',role:'viewer',perms:['print']}
+  ]};
+}
+function loadState(){try{return JSON.parse(localStorage.getItem(STORE))||defaultState()}catch(e){return defaultState()}}
+function save(){localStorage.setItem(STORE,JSON.stringify(state))}
+function backup(){try{localStorage.setItem(BACKUP,JSON.stringify({state,backupAt:new Date().toISOString()}));msg('تم حفظ نسخة احتياطية بنجاح')}catch(e){msg('تعذر حفظ النسخة الاحتياطية')}}
+function restore(){try{const b=localStorage.getItem(BACKUP);if(!b)return msg('لا توجد نسخة احتياطية محفوظة');const obj=JSON.parse(b);state=obj.state||obj;save();init();msg('تم استرجاع آخر نسخة بنجاح')}catch(e){msg('تعذر استرجاع النسخة الاحتياطية')}}
+function has(p){if(!currentUser)return false;if(currentUser.role==='admin')return true;return (currentUser.perms||[]).includes(p)}
+function isAdmin(){return currentUser&&currentUser.role==='admin'}
+function msg(t){status.textContent=t;clearTimeout(status._t);status._t=setTimeout(()=>status.textContent='',4200)}
+function fmt(n){return Number(n||0).toLocaleString(lang==='ar'?'ar-SA':'en-US',{maximumFractionDigits:0})}
+function fmtMoney(n){return fmt(n)+' ر.س'}
+function val(r,name){return Number((r.items||{})[name]||0)}
+function rev(r){return val(r,CORE.revenue)}
+function cogs(r){return val(r,CORE.cogs)}
+function gross(r){return val(r,CORE.gross) || rev(r)-cogs(r)}
+function net(r){return val(r,CORE.net)||gross(r)}
+function years(){return [...new Set([...state.manualYears,...state.records.map(r=>String(r.year))])].sort((a,b)=>Number(a)-Number(b))}
+function months(){return MONTHS_AR}
+function filteredRows(useChecks=false){
+  let ys=useChecks ? checked('.yCheck') : [yearFilter.value]; if(ys.includes('all')) ys=years();
+  let ms=useChecks ? checked('.mCheck') : [monthFilter.value]; if(ms.includes('all')) ms=months();
+  let br=branchFilter.value, item=itemFilter.value, q=searchBox.value.trim();
+  return state.records.filter(r=>ys.includes(String(r.year))&&ms.includes(r.month)&&(br==='all'||r.branchCode===br)&&(!q||r.branchName.includes(q)||Object.keys(r.items||{}).some(k=>k.includes(q))));
+}
+function checked(cls){const a=[...document.querySelectorAll(cls+':checked')].map(x=>x.value);return a.length?a:[]}
+function sumRows(rows,fn){return rows.reduce((a,r)=>a+fn(r),0)}
+function branchAgg(rows){
+  const map={}; rows.forEach(r=>{const k=r.branchCode; if(!map[k]) map[k]={branchCode:k,branchName:r.branchName,revenue:0,cogs:0,gross:0,net:0}; map[k].revenue+=rev(r);map[k].cogs+=cogs(r);map[k].gross+=gross(r);map[k].net+=net(r)});
+  return Object.values(map).sort((a,b)=>b.gross-a.gross);
+}
+function init(){
+  if(!currentUser){loginModal.classList.remove('hidden')} else loginModal.classList.add('hidden');
+  document.querySelectorAll('.admin-only').forEach(x=>x.classList.toggle('hidden',!(isAdmin()||has('branches'))));
+  roleChip.textContent=currentUser?(currentUser.role==='admin'?'أدمن':'مستخدم'):'غير مسجل';
+  buildFilters(); applyTheme(); applyLang(); renderAll(); renderUsers();
+}
+function buildFilters(){
+  const prevY=yearFilter.value||SEED.year, prevM=monthFilter.value||SEED.month, prevB=branchFilter.value||'all', prevI=itemFilter.value||'all';
+  yearFilter.innerHTML='<option value="all">كل السنوات</option>'+years().map(y=>`<option value="${y}">${y}</option>`).join('');
+  yearFilter.value=years().includes(prevY)?prevY:SEED.year;
+  monthFilter.innerHTML='<option value="all">كل الشهور</option>'+months().map(m=>`<option value="${m}">${m}</option>`).join('');
+  monthFilter.value=months().includes(prevM)?prevM:SEED.month;
+  branchFilter.innerHTML='<option value="all">كل الصيدليات</option>'+state.branches.map(b=>`<option value="${b.code}">${b.name}</option>`).join('');
+  branchFilter.value=state.branches.some(b=>b.code===prevB)?prevB:'all';
+  const allItems=[...new Set([...SEED.items.map(x=>x.name),...state.records.flatMap(r=>Object.keys(r.items||{}))])];
+  itemFilter.innerHTML='<option value="all">كل البنود</option>'+allItems.map(x=>`<option value="${x}">${x}</option>`).join('');
+  itemFilter.value=allItems.includes(prevI)?prevI:'all';
+  buildChecks();
+}
+function buildChecks(){
+  yearChecks.innerHTML=years().map(y=>`<label class="pill"><input class="yCheck" type="checkbox" value="${y}" ${y===yearFilter.value?'checked':''}>${y}</label>`).join('');
+  monthChecks.innerHTML=months().map(m=>`<label class="pill"><input class="mCheck" type="checkbox" value="${m}" ${m===monthFilter.value?'checked':''}>${m}</label>`).join('');
+  document.querySelectorAll('.yCheck,.mCheck').forEach(x=>x.onchange=renderAll);
+}
+function applyTheme(){document.body.className=document.body.className.replace(/theme-\w+/g,'').replace(/view-\w+/g,'');document.body.classList.add('theme-'+(themeMode.value||state.theme||'dark'));document.body.classList.add('view-'+(viewMode.value||state.view||'cards'));state.theme=themeMode.value;state.view=viewMode.value;save()}
+function applyLang(){document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';document.body.classList.toggle('en',lang==='en');langBtn.textContent=lang==='ar'?'English':'العربية';document.querySelectorAll('[data-ar]').forEach(el=>{el.textContent=el.dataset[lang]||el.dataset.ar});}
+function renderAll(){renderKpis();renderTables();renderCharts();renderAlerts();renderBranches();}
+function renderKpis(){
+  const rows=filteredRows(); const revenue=sumRows(rows,rev), cost=sumRows(rows,cogs), gp=sumRows(rows,gross), np=sumRows(rows,net);
+  const best=branchAgg(rows)[0], bad=branchAgg(rows).slice(-1)[0];
+  const list=[
+    ['إجمالي الإيرادات',revenue,'اضغط لعرض تفاصيل كل فرع',CORE.revenue,'var(--primary)'],
+    ['تكلفة المبيعات',cost,'اضغط لعرض تكلفة المبيعات',CORE.cogs,'var(--warn)'],
+    ['مجمل الربح',gp,'إجمالي الإيراد - تكلفة المبيعات',CORE.gross,gp>=0?'var(--secondary)':'var(--danger)'],
+    ['صافي الربح',np,'حسب بيانات القالب',CORE.net,np>=0?'var(--primary)':'var(--danger)'],
+    ['أفضل صيدلية',best?best.gross:0,best?best.branchName:'-','best','var(--purple)'],
+    ['صيدليات خاسرة',branchAgg(rows).filter(x=>x.gross<0).length,'عدد الفروع ذات خسارة','loss','var(--danger)']
+  ];
+  kpiGrid.innerHTML=list.map(x=>`<div class="kpi" data-key="${x[3]}" style="--kcolor:${x[4]}"><b>${x[0]}</b><div class="val">${typeof x[1]==='number'?fmtMoney(x[1]):x[1]}</div><div class="sub">${x[2]}</div></div>`).join('');
+  document.querySelectorAll('.kpi').forEach(k=>k.onclick=()=>showDetail(k.dataset.key));
+}
+function renderTables(){
+  const rows=filteredRows(), agg=branchAgg(rows);
+  dashHead.innerHTML='<tr><th>الصيدلية</th><th>الإيرادات</th><th>تكلفة المبيعات</th><th>مجمل الربح</th><th>هامش الربح</th></tr>';
+  dashBody.innerHTML=agg.map(x=>`<tr><td>${x.branchName}</td><td>${fmtMoney(x.revenue)}</td><td>${fmtMoney(x.cogs)}</td><td class="${x.gross>=0?'pos':'neg'}">${fmtMoney(x.gross)}</td><td>${x.revenue?((x.gross/x.revenue)*100).toFixed(1):0}%</td></tr>`).join('');
+  branchCards.innerHTML=agg.map(x=>`<div class="branch-card"><h3>${x.branchName}</h3><div class="metric-line"><span>الإيرادات</span><b>${fmtMoney(x.revenue)}</b></div><div class="metric-line"><span>تكلفة المبيعات</span><b>${fmtMoney(x.cogs)}</b></div><div class="metric-line"><span>مجمل الربح</span><b class="${x.gross>=0?'pos':'neg'}">${fmtMoney(x.gross)}</b></div><div class="metric-line"><span>هامش الربح</span><b>${x.revenue?((x.gross/x.revenue)*100).toFixed(1):0}%</b></div></div>`).join('');
+  const item=itemFilter.value==='all'?null:itemFilter.value;
+  const items=[...new Set(rows.flatMap(r=>Object.keys(r.items||{})))].filter(x=>!item||x===item);
+  detailHead.innerHTML='<tr><th>الفترة</th><th>الصيدلية</th>'+items.map(i=>`<th>${i}</th>`).join('')+'</tr>';
+  detailBody.innerHTML=rows.map(r=>`<tr><td>${r.month} ${r.year}</td><td>${r.branchName}</td>${items.map(i=>`<td class="${val(r,i)<0?'neg':''}">${fmtMoney(val(r,i))}</td>`).join('')}</tr>`).join('');
+  const comp=filteredRows(true).sort((a,b)=>(Number(a.year)-Number(b.year))||(MONTHS_AR.indexOf(a.month)-MONTHS_AR.indexOf(b.month)));
+  compareHead.innerHTML='<tr><th>الفترة</th><th>الصيدلية</th><th>الإيرادات</th><th>تكلفة المبيعات</th><th>مجمل الربح</th><th>نسبة التغير</th></tr>';
+  compareBody.innerHTML=comp.map((r,i)=>{const prev=i?gross(comp[i-1]):0;const diff=i&&prev?((gross(r)-prev)/Math.abs(prev)*100):0;return `<tr><td>${r.month} ${r.year}</td><td>${r.branchName}</td><td>${fmtMoney(rev(r))}</td><td>${fmtMoney(cogs(r))}</td><td class="${gross(r)>=0?'pos':'neg'}">${fmtMoney(gross(r))}</td><td class="${diff>=0?'pos':'neg'}">${i?diff.toFixed(1)+'%':'-'}</td></tr>`}).join('');
+}
+function drawBar(canvas, labels, series, title){
+  const ctx=canvas.getContext('2d'), dpr=window.devicePixelRatio||1; const w=Math.max(canvas.parentElement.clientWidth,760), h=320; canvas.width=w*dpr;canvas.height=h*dpr;canvas.style.width=w+'px';canvas.style.height=h+'px';ctx.scale(dpr,dpr);ctx.clearRect(0,0,w,h);ctx.font='12px Arial';ctx.fillStyle=getCss('--muted');ctx.fillText(title||'',20,22);
+  const ml=70,mr=25,mt=45,mb=55,pw=w-ml-mr,ph=h-mt-mb; const vals=series.flatMap(s=>s.data.map(v=>Math.abs(v))); const max=Math.max(1,...vals)*1.2; 
+  ctx.strokeStyle=getCss('--border');ctx.fillStyle=getCss('--muted'); for(let i=0;i<=4;i++){let y=mt+ph*i/4;ctx.beginPath();ctx.moveTo(ml,y);ctx.lineTo(w-mr,y);ctx.stroke();ctx.fillText(fmt(max*(1-i/4)),10,y+4)}
+  const groupW=pw/labels.length, bw=Math.max(10,Math.min(26,groupW/(series.length+1)));
+  series.forEach((s,si)=>{ctx.fillStyle=s.color; s.data.forEach((v,i)=>{let x=ml+i*groupW+groupW/2-(series.length*bw)/2+si*bw;let bh=Math.abs(v)/max*ph;let y=mt+ph-bh;ctx.fillRect(x,y,bw-2,bh);ctx.fillStyle=getCss('--text');ctx.font='bold 11px Arial';ctx.fillText(short(v),x-3,Math.max(12,y-7));ctx.fillStyle=s.color})});
+  ctx.fillStyle=getCss('--muted'); labels.forEach((l,i)=>{let x=ml+i*groupW+groupW/2;ctx.save();ctx.translate(x,h-30);ctx.rotate(-.35);ctx.fillText(l,0,0);ctx.restore()});
+}
+function drawDonut(canvas, data){
+  const ctx=canvas.getContext('2d'), w=420,h=330; canvas.width=w;canvas.height=h;ctx.clearRect(0,0,w,h); const total=data.reduce((a,b)=>a+Math.abs(b.value),0)||1;let a=-Math.PI/2; const colors=[getCss('--primary'),getCss('--secondary'),getCss('--warn'),getCss('--purple'),getCss('--danger'),'#14b8a6','#22c55e','#eab308'];
+  data.slice(0,8).forEach((d,i)=>{const ang=Math.abs(d.value)/total*Math.PI*2;ctx.beginPath();ctx.moveTo(160,160);ctx.arc(160,160,112,a,a+ang);ctx.closePath();ctx.fillStyle=colors[i%colors.length];ctx.fill();a+=ang;ctx.fillRect(300,45+i*27,12,12);ctx.fillStyle=getCss('--text');ctx.font='12px Arial';ctx.fillText(d.label.slice(0,22)+' '+(Math.abs(d.value)/total*100).toFixed(1)+'%',318,56+i*27);});
+  ctx.beginPath();ctx.fillStyle=getCss('--panel');ctx.arc(160,160,55,0,Math.PI*2);ctx.fill();ctx.fillStyle=getCss('--text');ctx.font='bold 15px Arial';ctx.fillText('الإجمالي',136,157);ctx.font='12px Arial';ctx.fillText(short(total),140,178);
+}
+function renderCharts(){
+  const rows=filteredRows(); const byPeriod={}; rows.forEach(r=>{let k=r.month+' '+r.year;if(!byPeriod[k])byPeriod[k]={rev:0,cogs:0,gross:0};byPeriod[k].rev+=rev(r);byPeriod[k].cogs+=cogs(r);byPeriod[k].gross+=gross(r)});
+  const labels=Object.keys(byPeriod), vals=Object.values(byPeriod);
+  drawBar(mainChart,labels,[{data:vals.map(x=>x.rev),color:getCss('--primary')},{data:vals.map(x=>x.cogs),color:getCss('--warn')},{data:vals.map(x=>x.gross),color:getCss('--secondary')}],'Revenue / COGS / Gross Profit');
+  drawDonut(donutChart,branchAgg(rows).map(x=>({label:x.branchName,value:x.gross})));
+  const comp=filteredRows(true), cp={}; comp.forEach(r=>{let k=r.month+' '+r.year;if(!cp[k])cp[k]=0;cp[k]+=gross(r)});
+  drawBar(compareChart,Object.keys(cp),[{data:Object.values(cp),color:getCss('--secondary')}],'Branch comparison');
+  const ba=branchAgg(rows); drawBar(branchChart,ba.map(x=>x.branchName.slice(0,14)),[{data:ba.map(x=>x.gross),color:getCss('--primary')}],'Branch ranking');
+  rankCards.innerHTML=ba.slice(0,6).map((x,i)=>`<div class="branch-card"><h3>${i+1}. ${x.branchName}</h3><div class="metric-line"><span>مجمل الربح</span><b class="${x.gross>=0?'pos':'neg'}">${fmtMoney(x.gross)}</b></div></div>`).join('');
+}
+function renderAlerts(){
+  const rows=filteredRows(), agg=branchAgg(rows); const alerts=[];
+  agg.forEach(x=>{if(x.gross<0)alerts.push(['high','خسارة في الفرع',`${x.branchName} لديه مجمل ربح سلبي ${fmtMoney(x.gross)}`]); else if(x.revenue && x.gross/x.revenue<.12)alerts.push(['mid','هامش ربح منخفض',`${x.branchName} هامش الربح أقل من 12%`]); else alerts.push(['good','أداء جيد',`${x.branchName} يحقق ربح موجب`])});
+  alertsList.innerHTML=alerts.map(a=>`<div class="alert ${a[0]}"><b>${a[1]}</b><div class="small">${a[2]}</div></div>`).join('');
+}
+function renderBranches(){
+  const agg=branchAgg(state.records);
+  branchesBody.innerHTML=state.branches.map(b=>{const x=agg.find(a=>a.branchCode===b.code)||{revenue:0,cogs:0,gross:0};return `<tr onclick="editBranch('${b.code}')"><td>${b.code}</td><td>${b.name}</td><td>${b.active?'نشط':'موقوف'}</td><td>${fmtMoney(x.revenue)}</td><td>${fmtMoney(x.cogs)}</td><td class="${x.gross>=0?'pos':'neg'}">${fmtMoney(x.gross)}</td></tr>`}).join('');
+}
+function showDetail(key){
+  let label=key, rows=filteredRows(); if(key==='best'||key==='loss') label=CORE.gross;
+  modalTitle.textContent='تفاصيل: '+label;
+  const agg=branchAgg(rows);
+  modalHead.innerHTML='<tr><th>الصيدلية</th><th>الفترة</th><th>القيمة</th><th>الإيرادات</th><th>تكلفة المبيعات</th><th>مجمل الربح</th></tr>';
+  modalBody.innerHTML=rows.map(r=>`<tr><td>${r.branchName}</td><td>${r.month} ${r.year}</td><td class="${val(r,label)<0?'neg':'pos'}">${label in r.items?fmtMoney(val(r,label)):fmtMoney(gross(r))}</td><td>${fmtMoney(rev(r))}</td><td>${fmtMoney(cogs(r))}</td><td class="${gross(r)>=0?'pos':'neg'}">${fmtMoney(gross(r))}</td></tr>`).join('');
+  drawBar(modalChart,agg.map(x=>x.branchName.slice(0,12)),[{data:agg.map(x=> key==='إجمالي تكلفة المبيعات'?x.cogs:key==='إجمالي الإيرادات'?x.revenue:x.gross),color:getCss('--primary')}],label);
+  detailModal.classList.remove('hidden');
+}
+function closeModal(){detailModal.classList.add('hidden')}
+function getCss(v){return getComputedStyle(document.body).getPropertyValue(v).trim()}
+function short(n){n=Math.abs(Number(n||0)); if(n>=1e6)return (n/1e6).toFixed(1)+'م'; if(n>=1000)return Math.round(n/1000)+'ك'; return String(Math.round(n))}
+function parseExcel(file){
+  const reader=new FileReader(); reader.onload=e=>{const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'}); let newRecords=[], newBranches=[];
+    wb.SheetNames.forEach(sn=>{const aoa=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:''}); if(aoa.length<3)return;
+      const title=String(aoa[0][0]||sn); const ym=detectYM(title,sn); const header=aoa[1]; const branchNames=header.slice(1).filter(x=>x&&String(x).trim()&&!String(x).includes('الإجمالي'));
+      branchNames.forEach((bn,bi)=>{let b=findOrCreateBranch(String(bn).trim()); const items={}; for(let r=2;r<aoa.length;r++){const item=String(aoa[r][0]||'').trim(); if(!item)continue; items[item]=num(aoa[r][bi+1]);} newRecords.push({year:ym.year,month:ym.month,branchCode:b.code,branchName:b.name,items});});
+    });
+    if(newRecords.length){backup(); state.records=mergeRecords(state.records,newRecords); save();init();msg('تم استيراد Excel وتحديث الداش بورد بنجاح')} else msg('لم يتم العثور على بيانات مطابقة للقالب');
+  }; reader.readAsArrayBuffer(file);
+}
+function findOrCreateBranch(name){let b=state.branches.find(x=>x.name===name); if(!b){b={code:'P'+String(state.branches.length+1).padStart(3,'0'),name,active:true};state.branches.push(b)}return b}
+function mergeRecords(oldRows,newRows){const map={}; oldRows.forEach(r=>map[`${r.year}|${r.month}|${r.branchCode}`]=r); newRows.forEach(r=>map[`${r.year}|${r.month}|${r.branchCode}`]=r); return Object.values(map)}
+function num(v){if(typeof v==='number')return v;let s=String(v||'').replace(/[,\s،]/g,'');let n=parseFloat(s);return isFinite(n)?n:0}
+function detectYM(a,b){const s=a+' '+b;let year=(s.match(/20\d{2}/)||[new Date().getFullYear()])[0];let month=MONTHS_AR.find(m=>s.includes(m))||SEED.month;return {year:String(year),month}}
+async function exportExcel(){
+  try{
+    if(typeof ExcelJS==='undefined') return exportExcelSimple();
+    const wb=new ExcelJS.Workbook();
+    wb.creator='Lana Pharmacies Dashboard';
+    wb.created=new Date();
+    const yearsList=years();
+    yearsList.forEach(y=>buildAnnualWorksheetExcelJS(wb,y));
+    buildGrandTotalWorksheetExcelJS(wb,yearsList);
+    const buffer=await wb.xlsx.writeBuffer();
+    const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='قائمة الدخل السنوية - صيدليات لنا.xlsx';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
+    msg('تم تصدير Excel سنوي بنفس تنسيق القالب مع صفحة إجمالي سنوي')
+  }catch(e){console.error(e);msg('حدث خطأ في تصدير Excel')}
+}
+function exportExcelSimple(){
+  const wb=XLSX.utils.book_new(); years().forEach(y=>{const aoa=buildAnnualAOA(y); const ws=XLSX.utils.aoa_to_sheet(aoa); XLSX.utils.book_append_sheet(wb,ws,String(y).slice(0,31));});
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(buildGrandTotalAOA(years())),'الإجمالي السنوي');
+  XLSX.writeFile(wb,'قائمة الدخل السنوية - صيدليات لنا.xlsx');
+}
+function templateBranches(){return state.branches.map(b=>b.name)}
+function templateItems(){return [...new Set([...SEED.items.map(x=>x.name),...state.records.flatMap(r=>Object.keys(r.items||{}))])].filter(Boolean)}
+function rowsFor(y,m){return state.records.filter(r=>String(r.year)===String(y)&&r.month===m)}
+function itemValue(rows,branchName,item){const rr=rows.find(r=>r.branchName===branchName);return rr?val(rr,item):0}
+function buildAnnualAOA(y){
+  const bs=templateBranches(), items=templateItems(), aoa=[];
+  MONTHS_AR.forEach(m=>{aoa.push([`قائمة الدخل التفصيلية  |  سلسلة صيدليات لنا  |  ${m} ${y}`]);aoa.push(['البـنـد  /  الفـرع',...bs,'الإجمالي']);const rows=rowsFor(y,m);items.forEach(item=>{const line=[item];let total=0;bs.forEach(b=>{const v=itemValue(rows,b,item);line.push(v);total+=v});line.push(total);aoa.push(line)});aoa.push([])});
+  return aoa;
+}
+function buildGrandTotalAOA(yearsList){const bs=templateBranches(), items=templateItems(), aoa=[];aoa.push(['الإجمالي السنوي | سلسلة صيدليات لنا']);aoa.push(['السنة','البند',...bs,'الإجمالي']);yearsList.forEach(y=>items.forEach(item=>{const line=[y,item];let total=0;bs.forEach(b=>{let v=0;MONTHS_AR.forEach(m=>v+=itemValue(rowsFor(y,m),b,item));line.push(v);total+=v});line.push(total)}));return aoa}
+function setCellStyle(cell,style){cell.font=style.font||cell.font;cell.fill=style.fill||cell.fill;cell.alignment=style.alignment||cell.alignment;cell.border=style.border||cell.border;cell.numFmt=style.numFmt||cell.numFmt}
+function buildAnnualWorksheetExcelJS(wb,y){
+  const ws=wb.addWorksheet(String(y),{views:[{rightToLeft:true,showGridLines:false}]});
+  const bs=templateBranches(),items=templateItems();
+  const lastCol=bs.length+2;
+  const titleFill={type:'pattern',pattern:'solid',fgColor:{argb:'FF17365D'}};
+  const headFill={type:'pattern',pattern:'solid',fgColor:{argb:'FF1F4E78'}};
+  const sectionFill={type:'pattern',pattern:'solid',fgColor:{argb:'FFD9EAF7'}};
+  const totalFill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE2F0D9'}};
+  const negFill={type:'pattern',pattern:'solid',fgColor:{argb:'FFFFE6E6'}};
+  const border={top:{style:'thin',color:{argb:'FFB7C9D6'}},left:{style:'thin',color:{argb:'FFB7C9D6'}},bottom:{style:'thin',color:{argb:'FFB7C9D6'}},right:{style:'thin',color:{argb:'FFB7C9D6'}}};
+  ws.columns=[{width:38},...bs.map(()=>({width:18})),{width:18}];
+  let row=1;
+  MONTHS_AR.forEach(m=>{
+    ws.mergeCells(row,1,row,lastCol); const t=ws.getCell(row,1); t.value=`قائمة الدخل التفصيلية  |  سلسلة صيدليات لنا  |  ${m} ${y}`; setCellStyle(t,{font:{bold:true,size:15,color:{argb:'FFFFFFFF'}},fill:titleFill,alignment:{horizontal:'center',vertical:'middle'},border}); ws.getRow(row).height=26; row++;
+    const h=ws.getRow(row); h.values=['البـنـد  /  الفـرع',...bs,'الإجمالي']; h.height=38; h.eachCell(c=>setCellStyle(c,{font:{bold:true,color:{argb:'FFFFFFFF'}},fill:headFill,alignment:{horizontal:'center',vertical:'middle',wrapText:true},border})); row++;
+    const rows=rowsFor(y,m);
+    items.forEach(item=>{
+      const r=ws.getRow(row); const vals=[item]; let total=0; bs.forEach(b=>{const v=itemValue(rows,b,item); vals.push(v); total+=v}); vals.push(total); r.values=vals;
+      const isSection=item.includes('◈'); const isTotal=/إجمالي|مجمل|صافي|نقطة التعادل|هامش/.test(item);
+      r.eachCell((c,cn)=>{setCellStyle(c,{font:{bold:isSection||isTotal,color:{argb:'FF1F2937'}},fill:isSection?sectionFill:(isTotal?totalFill:undefined),alignment:{horizontal:cn===1?'right':'center',vertical:'middle',wrapText:true},border,numFmt:cn===1?'@':'#,##0.00;[Red]-#,##0.00;-' }); if(typeof c.value==='number' && c.value<0)c.fill=negFill;});
+      row++;
+    });
+    row++;
+  });
+  ws.autoFilter={from:{row:2,column:1},to:{row:2,column:lastCol}};
+  ws.views=[{rightToLeft:true,showGridLines:false,state:'frozen',xSplit:1,ySplit:2}];
+}
+function buildGrandTotalWorksheetExcelJS(wb,yearsList){
+  const ws=wb.addWorksheet('الإجمالي السنوي',{views:[{rightToLeft:true,showGridLines:false}]});
+  const bs=templateBranches(),items=templateItems(); const lastCol=bs.length+3;
+  const titleFill={type:'pattern',pattern:'solid',fgColor:{argb:'FF0F766E'}};
+  const headFill={type:'pattern',pattern:'solid',fgColor:{argb:'FF115E59'}};
+  const totalFill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE2F0D9'}};
+  const border={top:{style:'thin',color:{argb:'FFB7C9D6'}},left:{style:'thin',color:{argb:'FFB7C9D6'}},bottom:{style:'thin',color:{argb:'FFB7C9D6'}},right:{style:'thin',color:{argb:'FFB7C9D6'}}};
+  ws.columns=[{width:14},{width:38},...bs.map(()=>({width:18})),{width:18}];
+  ws.mergeCells(1,1,1,lastCol); const t=ws.getCell(1,1);t.value='الإجمالي السنوي | سلسلة صيدليات لنا';setCellStyle(t,{font:{bold:true,size:16,color:{argb:'FFFFFFFF'}},fill:titleFill,alignment:{horizontal:'center'},border});
+  const h=ws.getRow(2);h.values=['السنة','البند',...bs,'الإجمالي'];h.height=36;h.eachCell(c=>setCellStyle(c,{font:{bold:true,color:{argb:'FFFFFFFF'}},fill:headFill,alignment:{horizontal:'center',vertical:'middle',wrapText:true},border}));
+  let row=3; yearsList.forEach(y=>items.forEach(item=>{const vals=[y,item];let total=0;bs.forEach(b=>{let v=0;MONTHS_AR.forEach(m=>v+=itemValue(rowsFor(y,m),b,item));vals.push(v);total+=v});vals.push(total);const r=ws.getRow(row);r.values=vals;const isTotal=/إجمالي|مجمل|صافي|نقطة التعادل|هامش/.test(item);r.eachCell((c,cn)=>setCellStyle(c,{font:{bold:isTotal,color:{argb:'FF1F2937'}},fill:isTotal?totalFill:undefined,alignment:{horizontal:cn<=2?'right':'center',vertical:'middle',wrapText:true},border,numFmt:cn<=2?'@':'#,##0.00;[Red]-#,##0.00;-'}));row++;}));
+  ws.autoFilter={from:{row:2,column:1},to:{row:2,column:lastCol}};
+  ws.views=[{rightToLeft:true,showGridLines:false,state:'frozen',xSplit:2,ySplit:2}];
+}
+function saveBranch(){
+  if(!has('branches'))return msg('لا توجد صلاحية');
+  const code=branchCode.value.trim()||('P'+String(state.branches.length+1).padStart(3,'0')); const name=branchName.value.trim(); if(!name)return msg('اكتب اسم الصيدلية');
+  let b=state.branches.find(x=>x.code===code); if(b){const old=b.name;b.name=name;b.active=branchActive.value==='active';state.records.forEach(r=>{if(r.branchCode===code){r.branchName=name}})} else state.branches.push({code,name,active:branchActive.value==='active'});
+  backup(); save(); init(); msg('تم حفظ الصيدلية');
+}
+function editBranch(code){const b=state.branches.find(x=>x.code===code); if(!b)return; branchCode.value=b.code;branchName.value=b.name;branchActive.value=b.active?'active':'inactive';document.querySelector('[data-tab="admin"]').click()}
+function deleteBranch(){
+  const code=branchCode.value.trim(); if(!code)return msg('حدد كود الصيدلية'); if(!confirm('حذف الصيدلية وبياناتها؟'))return;
+  backup(); state.branches=state.branches.filter(b=>b.code!==code); state.records=state.records.filter(r=>r.branchCode!==code); save(); init(); msg('تم حذف الصيدلية');
+}
+function renderUsers(){
+  usersBody.innerHTML=(state.users||[]).map(u=>`<tr><td>${u.username}</td><td>${u.role}</td><td>${(u.perms||[]).join(', ')}</td><td><button onclick="deleteUser('${u.username}')" class="danger">حذف</button></td></tr>`).join('');
+}
+function deleteUser(username){if(username==='admin')return msg('لا يمكن حذف الأدمن الأساسي');state.users=state.users.filter(u=>u.username!==username);save();renderUsers()}
+function addUser(){
+  const username=uName.value.trim(), password=uPass.value.trim()||'123456', role=uRole.value, perms=[...document.querySelectorAll('.permCheck:checked')].map(x=>x.value); if(!username)return;
+  let u=state.users.find(x=>x.username===username); if(u){u.password=password;u.role=role;u.perms=perms}else state.users.push({username,password,role,perms}); save();renderUsers();msg('تم حفظ المستخدم');
+}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+b.dataset.tab).classList.add('active');setTimeout(renderCharts,50)});
+[yearFilter,monthFilter,branchFilter,itemFilter,searchBox].forEach(el=>el.oninput=renderAll);
+themeMode.onchange=applyTheme; viewMode.onchange=()=>{applyTheme();renderAll()};
+importExcelBtn.onclick=()=>{if(!has('import'))return msg('لا توجد صلاحية استيراد');fileInput.click()}; fileInput.onchange=e=>e.target.files[0]&&parseExcel(e.target.files[0]);
+exportExcelBtn.onclick=()=>{if(!has('export'))return msg('لا توجد صلاحية تصدير');exportExcel()}; templateBtn.onclick=exportExcel; printBtn.onclick=printCurrentPage;
+backupBtn.onclick=()=>{if(!has('backup')&&!has('reset'))return msg('لا توجد صلاحية نسخ احتياطي');backup()}; restoreBtn.onclick=restore; resetBtn.onclick=()=>{if(!has('reset'))return msg('لا توجد صلاحية'); if(confirm('تهيئة النظام ومسح كل البيانات المالية المستوردة؟')){backup();state.records=[];state.manualYears=['2025','2026'];save();init();msg('تمت تهيئة النظام ومسح البيانات الافتراضية/المستوردة')}};
+adminBtn.onclick=()=>document.querySelector('[data-tab="admin"]').click(); compareBtn.onclick=()=>document.querySelector('[data-tab="compare"]').click();
+saveBranchBtn.onclick=saveBranch; deleteBranchBtn.onclick=deleteBranch; usersBtn.onclick=()=>usersModal.classList.remove('hidden'); addUserBtn.onclick=addUser;
+addYearBtn.onclick=()=>{const y=newYear.value.trim(); if(!/^20\d{2}$/.test(y))return msg('اكتب سنة صحيحة'); if(!state.manualYears.includes(y))state.manualYears.push(y);save();init();msg('تم إضافة السنة')};
+deleteEmptyYearsBtn.onclick=()=>{const used=new Set(state.records.map(r=>String(r.year)));state.manualYears=state.manualYears.filter(y=>used.has(y));save();init();msg('تم حذف السنوات اليدوية الفارغة')};
+langBtn.onclick=()=>{lang=lang==='ar'?'en':'ar';localStorage.setItem('lana_lang',lang);applyLang()};
+loginSwitchBtn.onclick=()=>{currentUser=null;localStorage.removeItem('lana_current_user');init()};
+function doLogin(){
+  ensureAdminUser();
+  const username=(loginUser.value||'').trim().toLowerCase();
+  const password=(loginPass.value||'').trim();
+  const u=state.users.find(x=>String(x.username||'').trim().toLowerCase()===username && String(x.password||'').trim()===password);
+  if(!u){
+    alert('بيانات الدخول غير صحيحة\nالمستخدم الافتراضي: admin\nكلمة المرور الافتراضية: Admin@2026');
+    loginPass.focus();
+    loginPass.select && loginPass.select();
+    return;
+  }
+  currentUser={username:u.username,role:u.role,perms:u.perms||[]};
+  localStorage.setItem('lana_current_user',JSON.stringify(currentUser));
+  loginPass.value='';
+  init();
+}
+loginBtn.onclick=doLogin;
+loginUser.addEventListener('keydown',function(e){
+  if(e.key==='Enter'){
+    e.preventDefault();
+    loginPass.focus();
+  }
+});
+loginPass.addEventListener('keydown',function(e){
+  if(e.key==='Enter'){
+    e.preventDefault();
+    doLogin();
+  }
+});
+viewerBtn.onclick=()=>{const u=state.users.find(x=>x.username==='viewer')||{username:'viewer',role:'viewer',perms:['print']};currentUser={username:u.username,role:u.role,perms:u.perms};localStorage.setItem('lana_current_user',JSON.stringify(currentUser));init()};
+window.addEventListener('resize',()=>setTimeout(renderCharts,100));
+themeMode.value=state.theme||'dark';viewMode.value=state.view||'cards';
+init();
+</script>
+</body>
+</html>
