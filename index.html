@@ -152,8 +152,8 @@ function defaultState(){
     records.push({year:SEED.year,month:SEED.month,branchCode:b.code,branchName:b.name,items});
   });
   return {branches,records,manualYears:['2025','2026'],theme:'dark',view:'cards',users:[
-    {username:'admin',password:'admin123',role:'admin',perms:['import','export','branches','users','reset','print']},
-    {username:'viewer',password:'123456',role:'viewer',perms:['print']}
+    {username:'ahmed',password:'ahmed@1990',role:'admin',perms:['import','export','branches','users','reset','print']},
+    {username:'viewer',password:'123456789',role:'viewer',perms:['print']}
   ]};
 }
 function loadState(){try{return JSON.parse(localStorage.getItem(STORE))||defaultState()}catch(e){return defaultState()}}
